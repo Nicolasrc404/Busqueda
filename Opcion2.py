@@ -314,6 +314,34 @@ def cu(grafo, inicio, objetivo):
 # PROGRAMA PRINCIPAL
 # ==================================================
 
+import sys
+
+def obtener_nodo_valido(grafo, mensaje, nodo_excluido=None):
+    """
+    Solicita al usuario un nodo válido del grafo
+    """
+    nodos_disponibles = sorted(grafo.keys())
+    
+    while True:
+        print(f"\n{mensaje}")
+        print(f"Nodos disponibles: {', '.join(nodos_disponibles)}")
+        
+        try:
+            nodo = input("Ingresa el nodo (letra mayúscula): ").strip().upper()
+        except EOFError:
+            print("\n❌ Error: No se pudo leer la entrada.")
+            return None
+        
+        if nodo not in grafo:
+            print(f"❌ Error: '{nodo}' no es un nodo válido. Intenta de nuevo.")
+            continue
+        
+        if nodo_excluido and nodo == nodo_excluido:
+            print(f"❌ Error: El nodo objetivo no puede ser igual al nodo inicial.")
+            continue
+        
+        return nodo
+
 def main():
     """
     Función principal que ejecuta los tres algoritmos
@@ -323,8 +351,8 @@ def main():
     print("="*70)
     print("\n📋 INFORMACIÓN DEL PROBLEMA:")
     print("  • Búsqueda de rutas en red social")
-    print("  • Nodo inicial: A (Ana)")
-    print("  • Nodo objetivo: D")
+    print("  • Red social de Ana (A) y sus amigos")
+    
     print("\n📊 GRAFO DE LA RED SOCIAL:")
     print("\n  Conexiones (Amigo1 - Amigo2: Interacciones):")
     print("  " + "-"*50)
@@ -343,8 +371,54 @@ def main():
     
     # Crear el grafo
     grafo = crear_grafo()
-    inicio = 'A'
-    objetivo = 'D'
+    
+    # Verificar si se pasaron argumentos de línea de comandos
+    if len(sys.argv) >= 3:
+        inicio = sys.argv[1].upper()
+        objetivo = sys.argv[2].upper()
+        
+        # Validar nodos
+        if inicio not in grafo:
+            print(f"\n❌ Error: '{inicio}' no es un nodo válido.")
+            print(f"Nodos disponibles: {', '.join(sorted(grafo.keys()))}")
+            return
+        
+        if objetivo not in grafo:
+            print(f"\n❌ Error: '{objetivo}' no es un nodo válido.")
+            print(f"Nodos disponibles: {', '.join(sorted(grafo.keys()))}")
+            return
+        
+        if inicio == objetivo:
+            print(f"\n❌ Error: El nodo inicial y objetivo no pueden ser iguales.")
+            return
+        
+        print("\n" + "="*70)
+        print("  CONFIGURACIÓN DE LA BÚSQUEDA (Argumentos)")
+        print("="*70)
+        print(f"\n  🔵 Nodo inicial: {inicio}")
+        print(f"  🎯 Nodo objetivo: {objetivo}")
+        
+    else:
+        # Solicitar nodo inicial y objetivo al usuario
+        print("\n" + "="*70)
+        print("  CONFIGURACIÓN DE LA BÚSQUEDA")
+        print("="*70)
+        print("\n💡 Tip: También puedes ejecutar con argumentos:")
+        print("   python red_social_busqueda.py A D")
+        
+        inicio = obtener_nodo_valido(grafo, "🔵 ¿Cuál es el NODO INICIAL?")
+        if inicio is None:
+            print("\n❌ Ejecución cancelada. Usa: python red_social_busqueda.py A D")
+            return
+        
+        objetivo = obtener_nodo_valido(grafo, "🎯 ¿Cuál es el NODO OBJETIVO?", nodo_excluido=inicio)
+        if objetivo is None:
+            print("\n❌ Ejecución cancelada. Usa: python red_social_busqueda.py A D")
+            return
+    
+    print("\n" + "="*70)
+    print(f"  ✓ Configuración: {inicio} → {objetivo}")
+    print("="*70)
     
     # ==================================================
     # PREGUNTA 1: BPA - Ruta más corta (costo unitario)
@@ -387,8 +461,9 @@ def main():
     print("\n\n" + "="*70)
     print("  RESUMEN COMPARATIVO DE LOS TRES ALGORITMOS")
     print("="*70)
+    print(f"\n  Búsqueda: {inicio} → {objetivo}\n")
     
-    print("\n┌" + "─"*68 + "┐")
+    print("┌" + "─"*68 + "┐")
     print("│ ALGORITMO │ RUTA ENCONTRADA          │ PASOS │ COSTO │ OPTIM. │")
     print("├" + "─"*68 + "┤")
     
@@ -396,7 +471,9 @@ def main():
     if camino_bpa:
         ruta_bpa = ' → '.join(camino_bpa)
         pasos_bpa = len(camino_bpa) - 1
-        print(f"│ BPA       │ {ruta_bpa:24} │   {pasos_bpa}   │   -   │   Sí   │")
+        # Ajustar formato según longitud
+        espacios = max(24 - len(ruta_bpa), 0)
+        print(f"│ BPA       │ {ruta_bpa}{' '*espacios} │   {pasos_bpa}   │   -   │   Sí   │")
     else:
         print("│ BPA       │ No encontrada            │   -   │   -   │   -    │")
     
@@ -404,7 +481,13 @@ def main():
     if camino_bpp:
         ruta_bpp = ' → '.join(camino_bpp)
         pasos_bpp = len(camino_bpp) - 1
-        print(f"│ BPP       │ {ruta_bpp:24} │   {pasos_bpp}   │   -   │   NO   │")
+        # Si es muy larga, truncar
+        if len(ruta_bpp) > 24:
+            ruta_bpp_mostrar = ruta_bpp[:21] + "..."
+        else:
+            ruta_bpp_mostrar = ruta_bpp
+        espacios = max(24 - len(ruta_bpp_mostrar), 0)
+        print(f"│ BPP       │ {ruta_bpp_mostrar}{' '*espacios} │   {pasos_bpp}   │   -   │   NO   │")
     else:
         print("│ BPP       │ No encontrada            │   -   │   -   │   -    │")
     
@@ -412,7 +495,8 @@ def main():
     if camino_cu:
         ruta_cu = ' → '.join(camino_cu)
         pasos_cu = len(camino_cu) - 1
-        print(f"│ CU        │ {ruta_cu:24} │   {pasos_cu}   │   {costo_cu}   │   Sí   │")
+        espacios = max(24 - len(ruta_cu), 0)
+        print(f"│ CU        │ {ruta_cu}{' '*espacios} │   {pasos_cu}   │   {costo_cu}   │   Sí   │")
     else:
         print("│ CU        │ No encontrada            │   -   │   -   │   -    │")
     
@@ -434,7 +518,8 @@ def main():
     if camino_bpp:
         print(f"   → Ruta: {' → '.join(camino_bpp)} ({len(camino_bpp)-1} pasos)")
         if camino_bpa and len(camino_bpp) > len(camino_bpa):
-            print(f"   ⚠️  Esta ruta tiene {len(camino_bpp)-len(camino_bpa)} pasos MÁS que BPA")
+            diferencia = len(camino_bpp) - len(camino_bpa)
+            print(f"   ⚠️  Esta ruta tiene {diferencia} paso{'s' if diferencia > 1 else ''} MÁS que BPA")
     
     print("\n3️⃣  CU (Búsqueda de Costo Uniforme):")
     print("   ✓ Encuentra la ruta de MENOR COSTO TOTAL")
@@ -443,16 +528,22 @@ def main():
     if camino_cu:
         print(f"   → Ruta: {' → '.join(camino_cu)} (costo total: {costo_cu})")
     
-    # Caso específico A → D
-    print("\n🎯 PARA ESTE CASO ESPECÍFICO (A → D):")
+    # Análisis específico del caso
+    print(f"\n🎯 PARA ESTE CASO ESPECÍFICO ({inicio} → {objetivo}):")
+    
     if camino_bpa and camino_cu and camino_bpa == camino_cu:
         print("   • BPA y CU encontraron LA MISMA RUTA")
-        print("   • Esto indica que la conexión directa A → D es:")
-        print("     - La más corta en número de pasos (1 paso)")
-        print("     - La de menor costo total (costo = 6)")
+        print("   • Esto indica que la ruta encontrada es:")
+        print(f"     - La más corta en número de pasos ({len(camino_bpa)-1} paso{'s' if len(camino_bpa)-1 != 1 else ''})")
+        print(f"     - La de menor costo total (costo = {costo_cu})")
+    elif camino_bpa and camino_cu:
+        print("   • BPA y CU encontraron RUTAS DIFERENTES")
+        print(f"   • BPA encontró la ruta más corta en pasos: {' → '.join(camino_bpa)}")
+        print(f"   • CU encontró la ruta de menor costo: {' → '.join(camino_cu)} (costo {costo_cu})")
     
     if camino_bpp and camino_bpa and len(camino_bpp) > len(camino_bpa):
-        print(f"   • BPP encontró una ruta {len(camino_bpp)-len(camino_bpa)}x MÁS LARGA")
+        factor = len(camino_bpp) / len(camino_bpa)
+        print(f"   • BPP encontró una ruta {factor:.1f}x MÁS LARGA que BPA")
         print("   • Esto demuestra que BPP NO es apropiado para encontrar rutas óptimas")
     
     print("\n" + "="*70)
