@@ -7,9 +7,10 @@ Autores:
 - Nicolas Rubiano Cortes
 """
 
-# GRAFO DE LA RED SOCIAL
+# GRAFO DE LA RED SOCIAL (no dirigido, con pesos)
 
 def crear_grafo():
+    """Crea el grafo como diccionario: nodo -> lista de (vecino, costo)."""
     return {
         'A': [('B', 2), ('C', 4), ('D', 6)],
         'B': [('A', 2), ('E', 3), ('F', 5)],
@@ -23,34 +24,45 @@ def crear_grafo():
         'J': [('C', 5), ('D', 5), ('E', 3), ('H', 4)]
     }
 
-# UTILIDADES DE IMPRESIÓN 
+# UTILIDADES DE IMPRESIÓN (prints básicos, sin end="")
 
-def imprimir_lista(titulo, lista):
+def imprimir_ruta(titulo, lista):
+    """Imprime una lista en formato: A -> B -> C (sin usar join ni end="")."""
     if titulo != "":
-        print(titulo, end=" ")
-    for i in range(len(lista)):
-        print(lista[i], end="")
+        print(titulo)
+
+    if len(lista) == 0:
+        print("(vacío)")
+        return
+
+    salida = ""
+    i = 0
+    while i < len(lista):
+        salida = salida + str(lista[i])
         if i != len(lista) - 1:
-            print(" -> ", end="")
-    print()
+            salida = salida + " -> "
+        i = i + 1
+    print(salida)
 
 def imprimir_vacio_si_corresponde(lista):
+    """Imprime '(vacío)' si la lista está vacía. Retorna True si imprimió vacío."""
     if len(lista) == 0:
         print("(vacío)")
         return True
     return False
 
-# ALGORITMO BPA (Búsqueda Primero en Anchura)
+# BPA (Búsqueda Primero en Anchura)
 
 def bpa(grafo, inicio, objetivo):
-    cola = [(inicio, [inicio])]
+    cola = [(inicio, [inicio])]  # (nodo, camino)
     visitados = set()
-    en_cola = {inicio}
+    en_cola = {inicio}           # para no duplicar en frontera
     orden = []
 
-    print("\n=== BPA (Búsqueda Primero en Anchura) ===")
+    print("=== BPA (Búsqueda Primero en Anchura) ===")
 
-    while cola:
+    while len(cola) > 0:
+        # FIFO: saco el primer elemento
         nodo, camino = cola.pop(0)
 
         if nodo in visitados:
@@ -59,23 +71,25 @@ def bpa(grafo, inicio, objetivo):
         visitados.add(nodo)
         orden.append(nodo)
 
+        # Si llegamos al objetivo, mostramos resultados
         if nodo == objetivo:
             frontera = []
             for item in cola:
                 frontera.append(item[0])
 
-            print("\nOrden de visita:")
-            imprimir_lista("", orden)
+            print("Orden de visita:")
+            imprimir_ruta("", orden)
 
             print("Ruta encontrada:")
-            imprimir_lista("", camino)
+            imprimir_ruta("", camino)
 
             print("Nodos frontera:")
             if not imprimir_vacio_si_corresponde(frontera):
-                imprimir_lista("", frontera)
+                imprimir_ruta("", frontera)
 
             return camino
 
+        # Encolar vecinos en el orden dado por el grafo
         for vecino, _ in grafo[nodo]:
             if vecino not in visitados and vecino not in en_cola:
                 cola.append((vecino, camino + [vecino]))
@@ -83,17 +97,17 @@ def bpa(grafo, inicio, objetivo):
 
     return None
 
-
-# ALGORITMO BPP (Búsqueda Primero en Profundidad)
+# BPP (Búsqueda Primero en Profundidad)
 
 def bpp(grafo, inicio, objetivo):
-    pila = [(inicio, [inicio])]
+    pila = [(inicio, [inicio])]  # (nodo, camino)
     visitados = set()
     orden = []
 
-    print("\n=== BPP (Búsqueda Primero en Profundidad) ===")
+    print("=== BPP (Búsqueda Primero en Profundidad) ===")
 
-    while pila:
+    while len(pila) > 0:
+        # LIFO: saco el último elemento
         nodo, camino = pila.pop()
 
         if nodo in visitados:
@@ -102,29 +116,33 @@ def bpp(grafo, inicio, objetivo):
         visitados.add(nodo)
         orden.append(nodo)
 
+        # Si llegamos al objetivo, mostramos resultados
         if nodo == objetivo:
             frontera = []
+            # La frontera "visual" se muestra desde el tope hacia abajo
             for item in reversed(pila):
                 frontera.append(item[0])
 
-            print("\nOrden de visita:")
-            imprimir_lista("", orden)
+            print("Orden de visita:")
+            imprimir_ruta("", orden)
 
             print("Ruta encontrada:")
-            imprimir_lista("", camino)
+            imprimir_ruta("", camino)
 
             print("Nodos frontera:")
             if len(frontera) == 0:
                 print("(vacío)")
             else:
-                imprimir_lista("", frontera)
+                imprimir_ruta("", frontera)
 
             return camino
 
+        # Para evitar duplicados en pila, recolectamos nodos ya en frontera
         en_frontera = set()
         for item in pila:
             en_frontera.add(item[0])
 
+        # Reversed para que el recorrido quede consistente con el orden esperado
         for vecino, _ in reversed(grafo[nodo]):
             if vecino in visitados:
                 continue
@@ -134,60 +152,55 @@ def bpp(grafo, inicio, objetivo):
 
     return None
 
-# ALGORITMO CU (Búsqueda de Costo Uniforme)
+# CU (Búsqueda de Costo Uniforme)
 
 def cu(grafo, inicio, objetivo):
-    # La cola guarda (costo_acumulado, nodo_actual, camino_recorrido)
-    cola = [(0, inicio, [inicio])]
+    cola = [(0, inicio, [inicio])]  # (costo, nodo, camino)
     visitados = set()
     orden = []
-    # Diccionario para rastrear el menor costo conocido a cada nodo
     mejor_costo = {inicio: 0}
 
-    print("\n=== CU (Búsqueda de Costo Uniforme) ===")
+    print("=== CU (Búsqueda de Costo Uniforme) ===")
 
-    while cola:
-        # 1. Siempre extraemos el nodo con el menor costo acumulado (Prioridad)
+    while len(cola) > 0:
+        # Menor costo primero (si empata, por nombre del nodo)
         cola.sort(key=lambda x: (x[0], x[1]))
         costo, nodo, camino = cola.pop(0)
 
-        # Si el nodo ya fue visitado con un costo menor, lo ignoramos
         if nodo in visitados:
             continue
 
         visitados.add(nodo)
         orden.append(nodo)
 
-        # 2. Verificamos si llegamos al objetivo
+        # Objetivo alcanzado: imprimir salida (sin mostrar "Costo total")
         if nodo == objetivo:
-            # Ordenamos la cola restante para mostrar la frontera correctamente
             cola.sort(key=lambda x: (x[0], x[1]))
 
             frontera = []
             vistos_en_frontera = set()
             for item in cola:
                 n_frontera = item[1]
-                # CORRECCIÓN: El objetivo y los ya visitados no deben estar en la frontera
+                # El objetivo y los visitados no deben aparecer como frontera
                 if n_frontera != objetivo and n_frontera not in visitados and n_frontera not in vistos_en_frontera:
                     vistos_en_frontera.add(n_frontera)
                     frontera.append(n_frontera)
 
-            print("\nOrden de visita:")
-            imprimir_lista("", orden)
+            print("Orden de visita:")
+            imprimir_ruta("", orden)
 
             print("Ruta encontrada:")
-            imprimir_lista("", camino)
+            imprimir_ruta("", camino)
 
             print("Nodos frontera:")
             if not imprimir_vacio_si_corresponde(frontera):
-                imprimir_lista("", frontera)
+                imprimir_ruta("", frontera)
 
             return camino, costo
 
-        # 3. Explorar vecinos
+        # Expandir vecinos: si mejora costo, se agrega a la cola
         for vecino, costo_arista in grafo[nodo]:
             nuevo_costo = costo + costo_arista
-            # Si encontramos un camino más corto hacia el vecino, lo actualizamos
             if vecino not in mejor_costo or nuevo_costo < mejor_costo[vecino]:
                 mejor_costo[vecino] = nuevo_costo
                 cola.append((nuevo_costo, vecino, camino + [vecino]))
