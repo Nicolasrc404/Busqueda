@@ -7,22 +7,23 @@ Autores:
 - Nicolas Rubiano Cortes
 """
 
-# GRAFO DE LA RED SOCIAL 
+# GRAFO DE LA RED SOCIAL (no dirigido, con pesos)
 
 def crear_grafo():
-    """Crea el grafo como diccionario: nodo -> lista de (vecino, costo)."""
-    return {
-        'A': [('B', 2), ('C', 4), ('D', 6)],
-        'B': [('A', 2), ('E', 3), ('F', 5)],
-        'C': [('A', 4), ('G', 7), ('H', 2), ('J', 5)],
-        'D': [('A', 6), ('I', 4), ('J', 5)],
-        'E': [('B', 3), ('G', 6), ('J', 3)],
-        'F': [('B', 5), ('H', 3), ('I', 5)],
-        'G': [('C', 7), ('E', 6), ('I', 2)],
-        'H': [('C', 2), ('F', 3), ('J', 4)],
-        'I': [('D', 4), ('F', 5), ('G', 2)],
-        'J': [('C', 5), ('D', 5), ('E', 3), ('H', 4)]
+    """Crea el grafo como diccionario: nodo -> {vecino: costo}."""
+    grafo = {
+        'A': {'B': 2, 'C': 4, 'D': 6},
+        'B': {'A': 2, 'E': 3, 'F': 5},
+        'C': {'A': 4, 'G': 7, 'H': 2, 'J': 5},
+        'D': {'A': 6, 'I': 4, 'J': 5},
+        'E': {'B': 3, 'G': 6, 'J': 3},
+        'F': {'B': 5, 'H': 3, 'I': 5},
+        'G': {'C': 7, 'E': 6, 'I': 2},
+        'H': {'C': 2, 'F': 3, 'J': 4},
+        'I': {'D': 4, 'F': 5, 'G': 2},
+        'J': {'C': 5, 'D': 5, 'E': 3, 'H': 4}
     }
+    return grafo
 
 # UTILIDADES DE IMPRESIÓN
 
@@ -89,8 +90,8 @@ def bpa(grafo, inicio, objetivo):
 
             return camino
 
-        # Encolar vecinos en el orden dado por el grafo
-        for vecino, _ in grafo[nodo]:
+        # Encolar vecinos (en el orden del diccionario)
+        for vecino in grafo[nodo]:
             if vecino not in visitados and vecino not in en_cola:
                 cola.append((vecino, camino + [vecino]))
                 en_cola.add(vecino)
@@ -120,8 +121,10 @@ def bpp(grafo, inicio, objetivo):
         if nodo == objetivo:
             frontera = []
             # La frontera "visual" se muestra desde el tope hacia abajo
-            for item in reversed(pila):
-                frontera.append(item[0])
+            i = len(pila) - 1
+            while i >= 0:
+                frontera.append(pila[i][0])
+                i = i - 1
 
             print("Orden de visita:")
             imprimir_ruta("", orden)
@@ -142,8 +145,11 @@ def bpp(grafo, inicio, objetivo):
         for item in pila:
             en_frontera.add(item[0])
 
-        # Reversed para que el recorrido quede consistente con el orden esperado
-        for vecino, _ in reversed(grafo[nodo]):
+        # Vecinos en orden inverso (para controlar el orden de exploración)
+        vecinos = list(grafo[nodo].keys())
+        vecinos.reverse()
+
+        for vecino in vecinos:
             if vecino in visitados:
                 continue
             if vecino in en_frontera:
@@ -181,15 +187,15 @@ def cu(grafo, inicio, objetivo):
         visitados.add(nodo)
         orden.append(nodo)
 
-        # Si llegamos al objetivo
+        # Objetivo alcanzado: imprimir salida (sin mostrar "Costo total")
         if nodo == objetivo:
 
-            # Construir frontera simple
             frontera = []
             for item in cola:
-                if item[1] not in visitados:
-                    if item[1] not in frontera:
-                        frontera.append(item[1])
+                n_frontera = item[1]
+                if n_frontera not in visitados:
+                    if n_frontera not in frontera:
+                        frontera.append(n_frontera)
 
             print("Orden de visita:")
             imprimir_ruta("", orden)
@@ -203,8 +209,9 @@ def cu(grafo, inicio, objetivo):
 
             return camino, costo
 
-        # Expandir vecinos
-        for vecino, costo_arista in grafo[nodo]:
+        # Expandir vecinos: nuevo_costo = costo + costo_arista
+        for vecino in grafo[nodo]:
+            costo_arista = grafo[nodo][vecino]
             nuevo_costo = costo + costo_arista
 
             if vecino not in mejor_costo or nuevo_costo < mejor_costo[vecino]:
@@ -212,7 +219,6 @@ def cu(grafo, inicio, objetivo):
                 cola.append((nuevo_costo, vecino, camino + [vecino]))
 
     return None, float('inf')
-
 
 # FUNCIÓN PRINCIPAL
 
@@ -237,8 +243,8 @@ def main():
     print("\nBúsqueda:", inicio, "->", objetivo)
     print("=" * 60)
 
-    camino_bpa = bpa(grafo, inicio, objetivo)
-    camino_bpp = bpp(grafo, inicio, objetivo)
-    camino_cu, costo_cu = cu(grafo, inicio, objetivo)
+    bpa(grafo, inicio, objetivo)
+    bpp(grafo, inicio, objetivo)
+    cu(grafo, inicio, objetivo)
 
 main()
