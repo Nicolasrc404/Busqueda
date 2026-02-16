@@ -28,13 +28,9 @@ def crear_grafo():
 # UTILIDADES DE IMPRESIÓN
 
 def imprimir_ruta(titulo, lista):
-    """Imprime una lista en formato: A -> B -> C (sin usar join ni end="")."""
+    """Imprime una lista en formato: A -> B -> C."""
     if titulo != "":
         print(titulo)
-
-    if len(lista) == 0:
-        print("(vacío)")
-        return
 
     salida = ""
     i = 0
@@ -44,13 +40,6 @@ def imprimir_ruta(titulo, lista):
             salida = salida + " -> "
         i = i + 1
     print(salida)
-
-def imprimir_vacio_si_corresponde(lista):
-    """Imprime '(vacío)' si la lista está vacía. Retorna True si imprimió vacío."""
-    if len(lista) == 0:
-        print("(vacío)")
-        return True
-    return False
 
 # BPA (Búsqueda Primero en Anchura)
 
@@ -85,7 +74,9 @@ def bpa(grafo, inicio, objetivo):
             imprimir_ruta("", camino)
 
             print("Nodos frontera:")
-            if not imprimir_vacio_si_corresponde(frontera):
+            if len(frontera) == 0:
+                print("(vacío)")
+            else:
                 imprimir_ruta("", frontera)
 
             return camino
@@ -204,7 +195,9 @@ def cu(grafo, inicio, objetivo):
             imprimir_ruta("", camino)
 
             print("Nodos frontera:")
-            if not imprimir_vacio_si_corresponde(frontera):
+            if len(frontera) == 0:
+                print("(vacío)")
+            else:
                 imprimir_ruta("", frontera)
 
             return camino, costo
