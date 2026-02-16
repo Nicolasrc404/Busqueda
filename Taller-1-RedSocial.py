@@ -30,7 +30,6 @@ def crear_grafo_dirigido():
 
 # ==================================================
 # UTILIDADES DE IMPRESIÓN (prints básicos)
-# - Separador: coma ","
 # ==================================================
 
 def imprimir_lista(titulo, lista):
@@ -68,7 +67,6 @@ def imprimir_ruta_guion(lista):
 
 # ==================================================
 # BPA (Búsqueda Primero en Anchura) - Cola FIFO
-# (SIN prints adentro: solo retorna datos)
 # ==================================================
 
 def bpa(grafo, inicio, objetivo):
@@ -105,13 +103,11 @@ def bpa(grafo, inicio, objetivo):
 
 # ==================================================
 # BPP (Búsqueda Primero en Profundidad) - Pila LIFO
-# ADAPTADA: usa 'generados' (como tu otro código)
-# (SIN prints adentro: solo retorna datos)
 # ==================================================
 
 def bpp(grafo, inicio, objetivo):
     frontera = [[inicio]]   # pila LIFO de caminos
-    generados = {inicio}    # nodos ya generados (ya puestos en frontera alguna vez)
+    generados = {inicio}    # nodos ya generados 
     expandidos = []
 
     while len(frontera) > 0:
@@ -145,9 +141,7 @@ def bpp(grafo, inicio, objetivo):
     return None, expandidos, []
 
 # ==================================================
-# CU (Búsqueda de Costo Uniforme) - simple, sin lambda
-# (SIN prints adentro: solo retorna datos)
-# - Frontera ordenada por menor costo acumulado
+# CU (Búsqueda de Costo Uniforme)
 # ==================================================
 
 def cu(grafo, inicio, objetivo):
@@ -182,7 +176,7 @@ def cu(grafo, inicio, objetivo):
                 if n not in visitados:
                     pares.append((c, n))
 
-            # Ordenar 'pares' por costo (y si empata, por nombre) sin lambda
+            # Ordenar 'pares' por costo (y si empata, por nombre)
             ordenados = []
             while len(pares) > 0:
                 idx = 0
@@ -220,7 +214,7 @@ def cu(grafo, inicio, objetivo):
     return None, 0, expandidos, []
 
 # ==================================================
-# MAIN (SOLO AQUÍ SE IMPRIME)
+# MAIN 
 # ==================================================
 
 def main():
@@ -287,7 +281,6 @@ def main():
             print("(vacío)")
         else:
             imprimir_lista("", nf_cu)
-        # Si NO quieres mostrar el costo total, borra esta línea:
     else:
         print("No se encontró ruta.")
 
