@@ -33,7 +33,7 @@ def crear_grafo_dirigido():
 # ==================================================
 
 def imprimir_lista(titulo, lista):
-    """Imprime una lista separada por coma: A, B, C (sin join ni end=")."""
+    """Imprime una lista separada por coma: A, B, C."""
     if titulo != "":
         print(titulo)
 
@@ -51,7 +51,7 @@ def imprimir_lista(titulo, lista):
     print(salida)
 
 def imprimir_ruta_guion(lista):
-    """Imprime ruta separada por ' - ' (solo para Ruta encontrada)."""
+    """Imprime ruta separada por ' - '."""
     if len(lista) == 0:
         print("(vacío)")
         return
