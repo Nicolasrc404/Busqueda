@@ -154,6 +154,8 @@ def bpp(grafo, inicio, objetivo):
 
 # CU (Búsqueda de Costo Uniforme)
 
+# CU (Búsqueda de Costo Uniforme) - versión simple sin lambda
+
 def cu(grafo, inicio, objetivo):
     cola = [(0, inicio, [inicio])]  # (costo, nodo, camino)
     visitados = set()
@@ -163,9 +165,17 @@ def cu(grafo, inicio, objetivo):
     print("=== CU (Búsqueda de Costo Uniforme) ===")
 
     while len(cola) > 0:
-        # Menor costo primero (si empata, por nombre del nodo)
-        cola.sort(key=lambda x: (x[0], x[1]))
-        costo, nodo, camino = cola.pop(0)
+
+        # Buscar manualmente el elemento con menor costo
+        indice_menor = 0
+        i = 1
+        while i < len(cola):
+            if cola[i][0] < cola[indice_menor][0]:
+                indice_menor = i
+            i = i + 1
+
+        # Sacar el de menor costo
+        costo, nodo, camino = cola.pop(indice_menor)
 
         if nodo in visitados:
             continue
@@ -173,18 +183,15 @@ def cu(grafo, inicio, objetivo):
         visitados.add(nodo)
         orden.append(nodo)
 
-        # Objetivo alcanzado: imprimir salida (sin mostrar "Costo total")
+        # Si llegamos al objetivo
         if nodo == objetivo:
-            cola.sort(key=lambda x: (x[0], x[1]))
 
+            # Construir frontera simple
             frontera = []
-            vistos_en_frontera = set()
             for item in cola:
-                n_frontera = item[1]
-                # El objetivo y los visitados no deben aparecer como frontera
-                if n_frontera != objetivo and n_frontera not in visitados and n_frontera not in vistos_en_frontera:
-                    vistos_en_frontera.add(n_frontera)
-                    frontera.append(n_frontera)
+                if item[1] not in visitados:
+                    if item[1] not in frontera:
+                        frontera.append(item[1])
 
             print("Orden de visita:")
             imprimir_ruta("", orden)
@@ -198,14 +205,16 @@ def cu(grafo, inicio, objetivo):
 
             return camino, costo
 
-        # Expandir vecinos: si mejora costo, se agrega a la cola
+        # Expandir vecinos
         for vecino, costo_arista in grafo[nodo]:
             nuevo_costo = costo + costo_arista
+
             if vecino not in mejor_costo or nuevo_costo < mejor_costo[vecino]:
                 mejor_costo[vecino] = nuevo_costo
                 cola.append((nuevo_costo, vecino, camino + [vecino]))
 
     return None, float('inf')
+
 
 # FUNCIÓN PRINCIPAL
 
