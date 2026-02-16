@@ -7,7 +7,7 @@ Autores:
 - Nicolas Rubiano Cortes
 """
 
-# GRAFO DE LA RED SOCIAL (no dirigido, con pesos)
+# GRAFO DE LA RED SOCIAL 
 
 def crear_grafo():
     """Crea el grafo como diccionario: nodo -> lista de (vecino, costo)."""
@@ -24,7 +24,7 @@ def crear_grafo():
         'J': [('C', 5), ('D', 5), ('E', 3), ('H', 4)]
     }
 
-# UTILIDADES DE IMPRESIÓN (prints básicos, sin end="")
+# UTILIDADES DE IMPRESIÓN
 
 def imprimir_ruta(titulo, lista):
     """Imprime una lista en formato: A -> B -> C (sin usar join ni end="")."""
@@ -153,8 +153,6 @@ def bpp(grafo, inicio, objetivo):
     return None
 
 # CU (Búsqueda de Costo Uniforme)
-
-# CU (Búsqueda de Costo Uniforme) - versión simple sin lambda
 
 def cu(grafo, inicio, objetivo):
     cola = [(0, inicio, [inicio])]  # (costo, nodo, camino)
