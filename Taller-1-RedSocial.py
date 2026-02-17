@@ -189,7 +189,7 @@ def cu(grafo, inicio, objetivo):
         visitados.add(nodo)
         orden.append(nodo)
 
-        # Objetivo alcanzado: imprimir salida (sin mostrar "Costo total")
+        # Objetivo alcanzado: imprimir salida
         if nodo == objetivo:
 
             frontera = []
@@ -215,7 +215,7 @@ def cu(grafo, inicio, objetivo):
 
             return camino, costo
 
-        # Expandir vecinos: nuevo_costo = costo + costo_arista
+        # Expandir vecinos
         for vecino in grafo[nodo]:
             costo_arista = grafo[nodo][vecino]
             nuevo_costo = costo + costo_arista
